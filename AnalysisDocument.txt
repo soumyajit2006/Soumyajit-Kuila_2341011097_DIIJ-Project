@@ -1,0 +1,19 @@
+Transaction boundaries preserve data integrity by ensuring that multiple database operations execute as a single atomic unit. If any step fails during execution, rollback restores the database to its previous consistent state and prevents partial updates.
+
+In the processLoan() transaction, the application verifies book availability, updates the book status, inserts a loan record, and updates the member active loan count. These operations are grouped into a single transaction using setAutoCommit(false). If any SQLException occurs, rollback() restores database consistency.
+
+Savepoints were implemented to support partial rollback functionality. This allows selective rollback within a transaction rather than reverting the entire transaction immediately.
+
+PreparedStatement outperformed Statement significantly during benchmarking because Derby reuses execution plans for precompiled queries. Statement required repeated SQL parsing and compilation, increasing overhead.
+
+Batch processing improved throughput because multiple SQL operations were grouped together before execution, reducing communication overhead and commit cost.
+
+Transaction granularity benchmarking demonstrated that batched commits are significantly faster than per-operation commits because commit operations are expensive in transactional systems.
+
+Query benchmarking showed that indexed lookups become more beneficial as dataset size increases. For very small datasets, full-table scans may occasionally appear faster due to index traversal overhead.
+
+There is a trade-off between safety and speed. Transactions, savepoints, rollback handling, indexing, and prepared statements introduce slight overhead but greatly improve consistency, security, and reliability.
+
+Validation testing included duplicate insert attempts, forced rollback scenarios, foreign key constraint validation, and Derby lock conflict testing. These tests confirmed that ACID transaction properties were maintained correctly throughout execution.
+
+The application uses Apache Derby Embedded Mode, so network disconnect simulations are not applicable. However, transaction conflict handling and rollback consistency were successfully demonstrated.
